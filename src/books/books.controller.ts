@@ -74,9 +74,9 @@ export class BooksController {
  * GET /books/:id
  */
 @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): ApiResponse<Books> {
+   async findOne(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Books>> {
     try {
-      const user = this.booksService.findOne(id);
+      const user =await  this.booksService.findOne(id);
       return {
         success: true,
         message: ' book found',
@@ -96,13 +96,13 @@ export class BooksController {
    * GET /users/title/:title
    */
   @Get('title/:title')
-  findBytitle(@Param('title') title: string): ApiResponse<Books> {
+   async findBytitle(@Param('title') title: string): Promise<ApiResponse<Books>> {
     try {
-      const Books = this.booksService.findBytitle(title);
+      const books = await  this.booksService.findBytitle(title);
       return {
         success: true,
         message: 'book By title found',
-        data: Books,
+        data: books,
       };
     } catch (error) {
       return {
@@ -143,9 +143,9 @@ export class BooksController {
    * DELETE /book/:id
    */
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number): ApiResponse<null> {
+    async remove(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
     try {
-      const result = this.booksService.remove(id);
+      const result =await  this.booksService.remove(id);
       return {
         success: true,
         message: result.message,
@@ -164,9 +164,9 @@ export class BooksController {
    * DELETE /books/:id/permanent
    */
   @Delete(':id/permanent')
-  delete(@Param('id', ParseIntPipe) id: number): ApiResponse<null> {
+   async delete(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
     try {
-      const result = this.booksService.delete(id);
+      const result =await this.booksService.delete(id);
 
       return {
         success: true,

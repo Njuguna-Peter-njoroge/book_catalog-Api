@@ -25,7 +25,7 @@ export class BooksService {
       
  },
           {   
-  id:1,
+  id:2,
       title:"The Taker",
       author:"James",
       published_year: new Date("2025-05-03"),
@@ -64,7 +64,7 @@ findAvailable():Books[] {
 }
 // find one
 findOne(id:number): Books{
-      const book =this.books.find((books) => book.id===id);
+      const book =this.books.find((book) => book.id===id);
       if(!book){
             throw new NotFoundException(`book with id ${id} not found`);
       }
@@ -100,7 +100,7 @@ update(id:number, data:updateBooksDto): Books {
 
     //soft delete
 
-    remove(id:number): {message:string} {
+     async remove(id:number): Promise<{ message: string; }> {
       const bookIndex = this.books.findIndex((book) => book.id === id);
       if(bookIndex===-1){
             throw new NotFoundException(`book with id${id} not found`);
@@ -114,7 +114,7 @@ message:`books ${this.books[bookIndex].title} has been checked out successfully`
     }
 
 
-    delete(id:number): {message:string} {
+   async  delete(id:number): Promise<{ message: string; }> {
       const bookIndex = this.books.findIndex((books) => books.id ===id);
       if(bookIndex === -1){
             throw new NotFoundException(` book with id ${id} not found `);

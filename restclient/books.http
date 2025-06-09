@@ -4,14 +4,23 @@ POST http://localhost:3000/books
 Content-Type: application/json
 
 {
-         "title": "The reacher",
-      "author":"richard bonston",
+         "title":"The almer",
+      "author":" Roder Rays",
      "isAvailable":true,
- "publishedDate": "2025-05-23"
+ "publishedDate": "2025-04-23"
  }
 
-####      GET ALL USERS
+####      GET ALL BOOKS 
 GET http://localhost:3000/books
 
-###
-GET http://localhost:3000/books?isAvailable=true
+### get one
+GET http://localhost:3000/books/2
+###update
+patch http://localhost:3000/books/1
+
+
+{
+  "title" :"the reseAECG"
+}
+###delete book by id
+DELETE http://localhost:3000/books/1
