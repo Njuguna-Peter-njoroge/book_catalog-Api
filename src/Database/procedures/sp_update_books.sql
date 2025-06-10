@@ -1,49 +1,34 @@
 CREATE OR REPLACE FUNCTION sp_update_books(
-      P_id INTEGER,
-       p_TITLE VARCHAR(255) NOT NULL,
-      p_AUTHOR VARCHAR(255) UNIQUE NOT NULL,
-      p_PUBLISHED_YEAR INTEGER NOT NULL.
-      p_isbn BIGINT UNIQUE NOT NULL,
-      p_is_available BOOLEAN DEFAULT TRUE
+    p_id INTEGER,
+    p_title VARCHAR(255),
+    p_author VARCHAR(255),
+    p_published_year INTEGER,
+    p_isbn BIGINT,
+    p_is_available BOOLEAN
 )
-RETURN TABLE(
+RETURNS TABLE (
+    id INTEGER,
+    title VARCHAR(255),
+    author VARCHAR(255),
+    published_year INTEGER,
+    isbn BIGINT,
+    is_available BOOLEAN
+)
+AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM books WHERE id = p_id) THEN
+        RAISE EXCEPTION 'Book with ID % not found', p_id;
+    END IF;
 
-      ID INTEGER,
-      TITLE VARCHAR(255),
-      AUTHOR VARCHAR(255),
-      PUBLISHED_YEAR INTEGER NOT NULL,
-      isbn BIGINT UNIQUE NOT NULL,
-      is_available BOOLEAN DEFAULT TRUE
-)AS $$            
-DECLARE 
-current_title VARCHAR(255)
-BEGIN 
-SELECT BOOKS.TITLE INTO current_title FROM BOOKS WHRE BOOKS.id= P.id,
-
-IF NOT FOUND THEN
-RAISE EXCEPTION ' BOOK WITH ID % NOT FOUND',P_id;
-END IF;
-
-
-IF p_TITLE IS NOT NULL AND p_TITLE != current_title THEN
-IF EXISTS (SELECT 1 FROM BOOKS WHERE BOOKS.TITLE = P.TITLE AND BOOKS.id != P.id) THEN
-
-RAISE EXCEPTION 'Another book with this title already exists'
-
-      END IF;
-      END IF;
-
-      RETURN QUERY
-      UPDATE BOOKS SET 
-      TITLE = COALESCE (p_TITLE, BOOKS.TITLE),
-      AUTHOR = COALESCE (p_AUTHOR, BOOKS.AUTHOR),
-      PUBLISHED_YEAR = (p_PUBLISHED_YEAR, BOOKS.PUBLISHED_YEAR),
-      isbn = (p_isbn,  BOOKS.isbn),
-      is_available = (p_is_available, BOOKS.is_available),
-
-      WHERE BOOKS.id = P_id  
-      RETURNING  title, author, published_year, isbn;
-      END;
-      
-      $$ language plpgsql
-                 
+    RETURN QUERY
+    UPDATE books
+    SET
+        title = COALESCE(p_title, title),
+        author = COALESCE(p_author, author),
+        published_year = COALESCE(p_published_year, published_year),
+        isbn = COALESCE(p_isbn, isbn),
+        is_available = COALESCE(p_is_available, is_available)
+    WHERE id = p_id
+    RETURNING id, title, author, published_year, isbn, is_available;
+END;
+$$ LANGUAGE plpgsql;

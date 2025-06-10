@@ -5,8 +5,8 @@ Content-Type: application/json
 
 
 {
-  "title": "the school",
-  "author": "Robert teACHER",
+  "title": "the reacher",
+  "author": "John",
   "published_year": 2015,
   "isbn": 7801345166,
   "isAvailable": true
@@ -22,7 +22,7 @@ patch http://localhost:3000/books/1
 
 
 {
-  "title" :"the reseAECG"
+  "title" :"the reacher"
 }
 ###delete book by id
 DELETE http://localhost:3000/books/1
