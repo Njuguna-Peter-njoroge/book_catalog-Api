@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION sp_create_books(
+CREATE OR REPLACE FUNCTION SP_CREATE_BOOKS(
     p_title VARCHAR,
     p_author VARCHAR,
     p_published_year INTEGER,

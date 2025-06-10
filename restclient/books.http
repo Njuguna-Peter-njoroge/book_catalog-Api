@@ -5,10 +5,10 @@ Content-Type: application/json
 
 
 {
-  "title": "the reacher",
-  "author": "John",
-  "published_year": 2015,
-  "isbn": 7801345166,
+  "title": "The ME",
+  "author": "ALBERT",
+  "published_year": 2022,
+  "isbn": 78016795166,
   "isAvailable": true
 }
 
@@ -16,7 +16,7 @@ Content-Type: application/json
 GET http://localhost:3000/books
 
 ### get one
-GET http://localhost:3000/books/1
+GET http://localhost:3000/books/10
 ###update
 patch http://localhost:3000/books/1
 
@@ -25,4 +25,4 @@ patch http://localhost:3000/books/1
   "title" :"the reacher"
 }
 ###delete book by id
-DELETE http://localhost:3000/books/1
+DELETE http://localhost:3000/books/9
