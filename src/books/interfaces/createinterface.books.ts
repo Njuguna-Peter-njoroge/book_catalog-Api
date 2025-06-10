@@ -2,8 +2,8 @@ export interface Books{
       id:number,
       title:string,
       author:string,
-      published_year:Date,
-      isbn:number,
+      published_year:number,
+      isbn:string,
       isAvailable?:boolean,
 
 }

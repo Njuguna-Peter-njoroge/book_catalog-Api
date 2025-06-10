@@ -5,7 +5,6 @@ import {
   HttpStatus,
   Post,
   Get,
-  Query,
   Param,
   ParseIntPipe,
   Patch,
@@ -17,8 +16,12 @@ import { createBooksDto } from './dtos/createbooks.dtos';
 import { updateBooksDto } from './dtos/updatebooks.dtos'; 
 import { BooksService } from './books.service';
 
-
-
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data?: T;
+  error?: string;
+}
 
 @Controller('books')
 export class BooksController {
@@ -26,9 +29,9 @@ export class BooksController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() data: createBooksDto): ApiResponse<Books> {
+  async create(@Body() data: createBooksDto): Promise<ApiResponse<Books>> {
     try {
-      const book = this.booksService.create(data);
+      const book = await this.booksService.create(data);
       return {
         success: true,
         message: 'Book added successfully',
@@ -44,19 +47,12 @@ export class BooksController {
   }
 
   @Get()
-  findAll(@Query('available') available?: string): ApiResponse<Books[]> {
+  async findAll(): Promise<ApiResponse<Books[]>> {
     try {
-      let books: Books[];
-
-      if (available === 'true') {
-        books = this.booksService.findAvailable();
-      } else {
-        books = this.booksService.findAll();
-      }
-
+      const books = await this.booksService.findAll();
       return {
         success: true,
-        message: `${books.length}  retrieved successfully`,
+        message: `${books.length} book(s) retrieved successfully`,
         data: books,
       };
     } catch (error) {
@@ -68,84 +64,49 @@ export class BooksController {
     }
   }
 
-/***
- * get book by id
- * 
- * GET /books/:id
- */
-@Get(':id')
-   async findOne(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Books>> {
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Books>> {
     try {
-      const user =await  this.booksService.findOne(id);
+      const book = await this.booksService.findOne(id);
       return {
         success: true,
-        message: ' book found',
-        data: user,
+        message: 'Book found',
+        data: book,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'book Not found',
-        error: error instanceof Error ? error.message : 'Unknown Error',
+        message: 'Book not found',
+        error: error.message,
       };
     }
   }
 
-  /**
-   * Find book by title
-   * GET /users/title/:title
-   */
-  @Get('title/:title')
-   async findBytitle(@Param('title') title: string): Promise<ApiResponse<Books>> {
-    try {
-      const books = await  this.booksService.findBytitle(title);
-      return {
-        success: true,
-        message: 'book By title found',
-        data: books,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'book with title not found',
-        error: error instanceof Error ? error.message : 'Unknown Error',
-      };
-    }
-  }
-
-  /**
-   * Update book 
-   * PATCH users/:id
-   */
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data:updateBooksDto,
-  ): ApiResponse<Books> {
+    @Body() data: updateBooksDto,
+  ): Promise<ApiResponse<Books>> {
     try {
-      const user = this.booksService.update(id, data);
+      const updatedBook = await this.booksService.update(id, data);
       return {
         success: true,
-        message: 'book info updated succesfully',
-        data: user,
+        message: 'Book info updated successfully',
+        data: updatedBook,
       };
     } catch (error) {
       return {
         success: false,
-        message: 'Failed to update books info',
-        error: error instanceof Error ? error.message : 'Unknown Error',
+        message: 'Failed to update book info',
+        error: error.message,
       };
     }
   }
 
-  /**
-   * Checkout a user (soft delete)
-   * DELETE /book/:id
-   */
   @Delete(':id')
-    async remove(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
     try {
-      const result =await  this.booksService.remove(id);
+      const result = await this.booksService.remove(id);
       return {
         success: true,
         message: result.message,
@@ -154,29 +115,7 @@ export class BooksController {
       return {
         success: false,
         message: 'Failed to remove book',
-        error: error instanceof Error ? error.message : ' Unknown error',
-      };
-    }
-  }
-
-  /**
-   * Permanently delete a book (hard delete)
-   * DELETE /books/:id/permanent
-   */
-  @Delete(':id/permanent')
-   async delete(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
-    try {
-      const result =await this.booksService.delete(id);
-
-      return {
-        success: true,
-        message: result.message,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Failed to hard delete book',
-        error: error instanceof Error ? error.message : 'Unknown Error',
+        error: error.message,
       };
     }
   }

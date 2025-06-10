@@ -1,130 +1,129 @@
-import { create } from 'domain';
-import { Books } from './interfaces/createinterface.books'; 
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { createBooksDto } from './dtos/createbooks.dtos'; 
-import { updateBooksDto } from './dtos/updatebooks.dtos'; 
-import { rename } from 'fs';
+import { Books } from "./interfaces/createinterface.books";
+import { createBooksDto } from "./dtos/createbooks.dtos";
+import { updateBooksDto } from "./dtos/updatebooks.dtos";
+import { DatabaseService } from "src/Database/connection.service";
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
 
 @Injectable()
 export class BooksService {
-   findBytitle(title: string): Books {
-  const book = this.books.find((book) => book.title === title);
-  if (!book) {
-    throw new NotFoundException(`Book with title "${title}" not found`);
+  findByTitle(title: string) {
+    throw new Error('Method not implemented.');
   }
-  return book;
-}
+  delete(id: number) {
+    throw new Error('Method not implemented.');
+  }
+  constructor(private readonly databaseService: DatabaseService) {}
 
-      private books: Books[]=[
-            {   
-       id:1,
-      title:"The Racher",
-      author:"John",
-      published_year: new Date("2025-04-07"),
-      isbn:56754,
-      
- },
-          {   
-  id:2,
-      title:"The Taker",
-      author:"James",
-      published_year: new Date("2025-05-03"),
-      isbn:454354,
-         }
-      ];
+  // Create
+  async create(createBooksDto: createBooksDto): Promise<Books> {
+    try {
+      const result = await this.databaseService.query(
+        `SELECT * FROM SP_CREATE_BOOKS($1, $2, $3, $4, $5)`,
+        [
+          createBooksDto.title,
+          createBooksDto.author,
+          createBooksDto.published_year,
+          createBooksDto.isbn,
+          createBooksDto.isAvailable,
+        ],
+      );
 
-      private nextId = 3;
-
-      create( data: createBooksDto): Books {
-        const existingBook = this.books.find(
-  (book) => book.title === data.title 
-);
-
-            if(existingBook){
-                  throw new ConflictException(
-                        `book with title ${data.title} already exists`,
-                  )
-            }
-            const newBook : Books = {
-                  id: Number(this.nextId++),
-                  ...data,
-            };
-      this.books.push(newBook);
-      return newBook;
-}
-// find all
-
-findAll (): Books[]{
-return this.books;
-}
-// find available
-
-findAvailable():Books[] {
-      return this.books.filter((books) =>books.isAvailable);
-}
-// find one
-findOne(id:number): Books{
-      const book =this.books.find((book) => book.id===id);
-      if(!book){
-            throw new NotFoundException(`book with id ${id} not found`);
+      if (result.rows.length === 0) {
+        throw new NotFoundException('Failed to create a book');
       }
-      return book;
 
-}
-findByAuthor(author: string): Books{
-      const book = this.books.find((books) => book.
-      author===author);
-      if(!book){
-            throw  new NotFoundException(`book wrote by author${author} not found`);
+      return result.rows[0];
+    } catch (error) {
+      if (error.message.includes('already exists')) {
+        throw new ConflictException(
+          `Book with ISBN ${createBooksDto.isbn} already exists`,
+        );
       }
-      return book;
-}
-//update
-
-
-update(id:number, data:updateBooksDto): Books {
-      const bookIndex = this.books.findIndex((book) => book.id === id);
-      if(bookIndex === -1) {
-            throw new NotFoundException(`book with id${id} not found`);
-
-      }
-    const updatedBooks = {
-      ...this.books[bookIndex],
-     ... data,
-
-    };
-    this.books[bookIndex] = updatedBooks;
-    return updatedBooks;
-    
+      console.error('Database error:', error);
+      throw new InternalServerErrorException('Failed to create book');
     }
+  }
 
-    //soft delete
+  // Find all books
+  async findAll(): Promise<Books[]> {
+    try {
+      const result = await this.databaseService.query(
+        `SELECT * FROM sp_get_all_books()`,
+      );
 
-     async remove(id:number): Promise<{ message: string; }> {
-      const bookIndex = this.books.findIndex((book) => book.id === id);
-      if(bookIndex===-1){
-            throw new NotFoundException(`book with id${id} not found`);
-      }
-      this.books[bookIndex].isAvailable = false;
-
-      return{
-message:`books ${this.books[bookIndex].title} has been checked out successfully`,
-      };
-
+      return result.rows;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw new InternalServerErrorException('Failed to fetch books');
     }
+  }
 
+  // Find one book by ID
+  async findOne(id: number): Promise<Books> {
+    try {
+      const result = await this.databaseService.query(
+        `SELECT * FROM sp_get_book_by_id($1)`,
+        [id],
+      );
 
-   async  delete(id:number): Promise<{ message: string; }> {
-      const bookIndex = this.books.findIndex((books) => books.id ===id);
-      if(bookIndex === -1){
-            throw new NotFoundException(` book with id ${id} not found `);
-          
+      if (result.rows.length === 0) {
+        throw new NotFoundException(`Book with ID ${id} not found`);
       }
-                  const dleleteBook = this.books.splice(bookIndex, 1)[0];
-                 return {
-                  message: `book ${dleleteBook.title} has been deleted successfully`,
-            };
+
+      return result.rows[0];
+    } catch (error) {
+      console.error('Database error:', error);
+      throw new InternalServerErrorException('Failed to fetch book');
     }
+  }
+
+  // Update
+  async update(id: number, updateBooksDto: updateBooksDto): Promise<Books> {
+    try {
+      const result = await this.databaseService.query(
+        `SELECT * FROM sp_update_books($1, $2, $3, $4, $5, $6)`,
+        [
+          id,
+          updateBooksDto.title,
+          updateBooksDto.author,
+          updateBooksDto.published_year,
+          updateBooksDto.isbn,
+          updateBooksDto.isAvailable,
+        ],
+      );
+
+      if (result.rows.length === 0) {
+        throw new NotFoundException(`Book with ID ${id} not found for update`);
+      }
+
+      return result.rows[0];
+    } catch (error) {
+      console.error('Database error:', error);
+      throw new InternalServerErrorException('Failed to update book');
+    }
+  }
+
+  // Delete
+  async remove(id: number): Promise<{ message: string }> {
+    try {
+      const result = await this.databaseService.query(
+        `SELECT * FROM sp_delete_books($1)`,
+        [id],
+      );
+
+      if (result.rows.length === 0) {
+        throw new NotFoundException(`Book with ID ${id} not found for deletion`);
+      }
+
+      return { message: `Book with ID ${id} deleted successfully` };
+    } catch (error) {
+      console.error('Database error:', error);
+      throw new InternalServerErrorException('Failed to delete book');
+    }
+  }
 }
-
- 

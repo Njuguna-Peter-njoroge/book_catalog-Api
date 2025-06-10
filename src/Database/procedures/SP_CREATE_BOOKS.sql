@@ -1,31 +1,16 @@
-CREATE OR REPLACE FUNCTION SP_CREATE_BOOKS(
-      p_TITLE VARCHAR(255) NOT NULL,
-      p_AUTHOR VARCHAR(255) UNIQUE NOT NULL,
-      p_PUBLISHED_YEAR INTEGER NOT NULL.
-      p_isbn BIGINT UNIQUE NOT NULL,
-      p_is_available BOOLEAN DEFAULT TRUE
+CREATE OR REPLACE FUNCTION sp_create_books(
+    p_title VARCHAR,
+    p_author VARCHAR,
+    p_published_year INTEGER,
+    p_isbn BIGINT,
+    p_is_available BOOLEAN
 )
-
-RETURNS TABLE(
-ID INTEGER,
-TITLE VARCHAR(255),
-AUTHOR VARCHAR(255),
-PUBLISHED_YEAR INTEGER NOT NULL,
-isbn BIGINT UNIQUE NOT NULL,
-is_available BOOLEAN DEFAULT TRUE
-)AS $$
+RETURNS SETOF books AS $$
 BEGIN
-
-
--- check if a boo with the same title exists
-if EXISTS (SELECT ! FROM BOOKS WHERE BOOKS.title = p_TITLE) THEN
-RAISE EXCEPTION 'book with title % already exists', p_TITLE;
-END if;
-
-
-RETURN QUERY 
-INSERT INTO BOOKS(title,author,published_year,isbn,is_available)
-VALUES(p_TITLE,p_AUTHOR,p_PUBLISHED_YEAR,p_isbn, p_is_available)
-  RETURNING title, author, published_year, isbn;
+    RETURN QUERY 
+    INSERT INTO books(title, author, published_year, isbn, is_available)
+    VALUES (p_title, p_author, p_published_year, p_isbn, p_is_available)
+    RETURNING *;
 END;
-$$ language plpgsql;
+$$ LANGUAGE plpgsql;
+

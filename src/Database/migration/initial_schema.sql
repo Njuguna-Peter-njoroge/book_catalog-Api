@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS books (
     title VARCHAR(255) NOT NULL,
     author VARCHAR(255) UNIQUE NOT NULL,
     published_year INTEGER NOT NULL,
-    isbn BIGINT UNIQUE NOT NULL,
+    isbn BIGINT,
     is_available BOOLEAN DEFAULT TRUE
 );
 

@@ -3,18 +3,20 @@
 POST http://localhost:3000/books
 Content-Type: application/json
 
+
 {
-         "title":"The almer",
-      "author":" Roder Rays",
-     "isAvailable":true,
- "publishedDate": "2025-04-23"
- }
+  "title": "the school",
+  "author": "Robert teACHER",
+  "published_year": 2015,
+  "isbn": 7801345166,
+  "isAvailable": true
+}
 
 ####      GET ALL BOOKS 
 GET http://localhost:3000/books
 
 ### get one
-GET http://localhost:3000/books/2
+GET http://localhost:3000/books/1
 ###update
 patch http://localhost:3000/books/1
 

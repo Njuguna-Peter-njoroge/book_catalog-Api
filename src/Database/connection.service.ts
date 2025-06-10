@@ -11,6 +11,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         await this.testConnection();
     }
 
+
     async onModuleDestroy() {
         if (this.pool) {
             await this.pool.end();

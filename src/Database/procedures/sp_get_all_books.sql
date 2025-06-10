@@ -1,44 +1,34 @@
-CREATE OD REPLACE FUNCTION sp_get_all_books()
-RETURNS SETOF BOOKS AS $$ 
+
+
+    CREATE OR REPLACE FUNCTION sp_get_all_books()
+RETURNS SETOF books AS $$
 BEGIN
-     
-     RETURN QUERY SELECT * FROM BOOKS ORDER BY TITLE ;
-     END ;
-     $$ language plpgsql;
-
-     CREATE OR REPLACE FUNCTION sp_get_all_books()
-     RETURNS SETOF BOOKS AS   $$
-     BEGIN
-     RETURN QUERY SELECT * from BOOKS WHERE is_available = TRUE ORDER by TITLE;
-     END;
-    $$ language plpgsql;
+    RETURN QUERY SELECT * FROM books ORDER BY title;
+END;
+$$ LANGUAGE plpgsql;
 
 
-
-
-    CREATE or REPLACE FUNCTION sp_get_books_by_ID (p_id INTEGER)
-
-    RETURN SETOF BOOKS as $$
-
-    BEGIN
-    RETURN QUERY SELECT * from BOOKS where ID = p.id;
+    CREATE OR REPLACE FUNCTION sp_get_book_by_id(p_id INTEGER)
+RETURNS SETOF books AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM books WHERE id = p_id;
 
     IF NOT FOUND THEN
-    RAISE EXCEPTION 'GUEST WITH ID % NOT FOUND' P_id;
+        RAISE EXCEPTION 'Book with ID % not found', p_id;
     END IF;
-    END;
-    $$ language plpgsql;
+END;
+$$ LANGUAGE plpgsql;
 
 
-CREATE or REPLACE FUNCTION sp_get_books_by_PUBLISHED_YEAR(p_PUBLISHED_YEAR INTEGER)
 
-    RETURN SETOF BOOKS as $$
-
-    BEGIN
-    RETURN QUERY SELECT * from BOOKS where PUBLISHED_YEAR = p.PUBLISHED_YEAR;
+CREATE OR REPLACE FUNCTION sp_get_books_by_published_year(p_published_year INTEGER)
+RETURNS SETOF books AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM books WHERE published_year = p_published_year;
 
     IF NOT FOUND THEN
-    RAISE EXCEPTION 'GUEST WITH ID % NOT FOUND' p_PUBLISHED_YEAR;
+        RAISE EXCEPTION 'No books found for published year %', p_published_year;
     END IF;
-    END;
-    $$ language plpgsql;
+END;
+$$ LANGUAGE plpgsql;
+
